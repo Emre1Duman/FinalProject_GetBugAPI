@@ -1,31 +1,27 @@
 from flask import Flask, request
-import boto3, json, botocore, botocore.session
-from aws_secretsmanager_caching import SecretCache, SecretCacheConfig 
+import boto3, json
+
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
+##AWS CREDENTIALS##
+AWS_ACCESS_KEY = 'AKIA5DEGBULNX5ZQQNUD'
+AWS_SECRET_KEY = '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'
+
 ##RETRIEVE SECRETS FROM SECRET MANAGER##
-client = botocore.session.get_session().create_client('secretsmanager')
-cache_config = SecretCacheConfig()
-cache = SecretCache( config = cache_config, client = client)
-
-##AWS SECRETS##
-AWSKeySecret = cache.get_secret_string('AWS_Keys') #Retrieve AWS secret
-jsonAWS = json.loads(AWSKeySecret) #jsonify secrets
-
-AWS_ACCESS_KEY = jsonAWS['AWS_Access_Key']
-AWS_SECRET_KEY = jsonAWS['AWS_Secret_Key']
+client = boto3.client('secretsmanager', region_name = 'us-east-1', aws_access_key_id = AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
 
 ##SQS SECRETS##
-SQSSecret = cache.get_secret_string('SQS_QueueURL') 
-jsonSQS = json.loads(SQSSecret)
-
-SQS_Queue = jsonSQS['SQS_Queue']
+responseSQS = client.get_secret_value( 
+    SecretId = 'SQS_QueueURL'
+)
+jsonSQS = json.loads(responseSQS['SecretString'])
+Queue_url = jsonSQS['SQS_Queue']
 
 ##Queue Connections##
 sqs = boto3.client('sqs', region_name='us-east-1', aws_access_key_id = AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
-queue_url = SQS_Queue
+queue_url = Queue_url
 
 
 @app.route('/submitBug', methods=['POST'])
