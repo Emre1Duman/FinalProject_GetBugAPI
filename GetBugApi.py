@@ -6,8 +6,8 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 
 ##AWS CREDENTIALS##
-AWS_ACCESS_KEY = 'AKIA5DEGBULNX5ZQQNUD'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = ''
+AWS_SECRET_KEY = ''
 
 ##RETRIEVE SECRETS FROM SECRET MANAGER##
 client = boto3.client('secretsmanager', region_name = 'us-east-1', aws_access_key_id = AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
